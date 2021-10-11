@@ -1,14 +1,14 @@
 Package: test2norm
 Type: Package
 Title: Normative Standards for Cognitive Tests
-Version: 0.1.1
+Version: 0.2.0
 Author: Anya Umlauf
-Maintainer: Anya Umlauf <aumlauf@ucsd.edu>
-Description: Function test2norm() generates formulas for normative standards 
-    applied to cognitive tests. It takes raw test scores (e.g., number of 
-    correct responses) and converts them to scaled scores and demographically 
-    adjusted scores, using methods described in Heaton et al. (2003) 
-    <doi:10.1016/B978-012703570-3/50010-9> & Heaton et al. (2009, 
+Maintainer: Anya Umlauf <aumlauf@health.ucsd.edu>
+Description: Package test2norm contains functions to generate formulas for 
+    normative standards applied to cognitive tests. It takes raw test scores 
+    (e.g., number of correct responses) and converts them to scaled scores and 
+    demographically adjusted scores, using methods described in Heaton et al. 
+    (2003) <doi:10.1016/B978-012703570-3/50010-9> & Heaton et al. (2009, 
     ISBN:9780199702800). The scaled scores are calculated as quantiles of the 
     raw test scores, scaled to have the mean of 10 and standard deviation of 3, 
     such that higher values always correspond to better performance on the test. 
@@ -22,8 +22,8 @@ Encoding: UTF-8
 LazyData: true
 Imports: mfp
 Depends: R (>= 2.10)
-RoxygenNote: 6.1.1
+RoxygenNote: 7.1.1
 NeedsCompilation: no
-Packaged: 2019-10-15 21:03:19 UTC; umlauf
+Packaged: 2021-10-10 22:54:01 UTC; umlauf
 Repository: CRAN
-Date/Publication: 2019-10-16 12:00:02 UTC
+Date/Publication: 2021-10-11 18:30:02 UTC

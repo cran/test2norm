@@ -23,4 +23,3 @@
 #'           demographics = c("age", "sex"))
 "PsychTestData"
 
-

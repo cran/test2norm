@@ -4,14 +4,16 @@
 \name{PsychTestData}
 \alias{PsychTestData}
 \title{Neuropsychological test data}
-\format{A data frame with 250 rows and 4 variables:
+\format{
+A data frame with 250 rows and 4 variables:
 \describe{
 \item{rawscore}{raw test score on a neuropsychological test, ranging 0-36,
 with higher values indicating better test performance}
 \item{age}{age of the participant, in years}
 \item{sex}{sex of the participant, male (M) or female (F)}
 \item{group}{norming group the participant belongs to (control or test)}
-}}
+}
+}
 \usage{
 PsychTestData
 }

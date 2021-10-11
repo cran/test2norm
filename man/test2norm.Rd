@@ -4,11 +4,22 @@
 \alias{test2norm}
 \title{Convert raw neuropsychological test scores to demographically adjusted norms.}
 \usage{
-test2norm(data = NULL, test = NULL, test.min = NULL,
-  test.max = NULL, test.better = c("High", "Low"), group.id = NULL,
-  control.id = NULL, all.controls = FALSE, demographics = NULL,
-  mfp.alpha = 1, rnd.s = TRUE, rnd.a = TRUE, mean.a = 50,
-  sd.a = 10)
+test2norm(
+  data = NULL,
+  test = NULL,
+  test.min = NULL,
+  test.max = NULL,
+  test.better = c("High", "Low"),
+  group.id = NULL,
+  control.id = NULL,
+  all.controls = FALSE,
+  demographics = NULL,
+  mfp.alpha = 1,
+  rnd.s = TRUE,
+  rnd.a = TRUE,
+  mean.a = 50,
+  sd.a = 10
+)
 }
 \arguments{
 \item{data}{a data frame containing the variables needed for the norming
@@ -39,7 +50,7 @@ into normative formulas.}
 
 \item{mfp.alpha}{a numeric value between 0 and 1 that sets significance level
 for inclusion of demographic predictors into normative formula. Passed to the
-mfp() function. Default value is 1 for inclusion of all predictors,
+mfp() function. Default value is 1 for inclusion of all predictors
 regardless of their significance.}
 
 \item{rnd.s}{a logical indicating whether the scaled scores should be

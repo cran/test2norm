@@ -19,7 +19,7 @@
 #' into normative formulas.
 #' @param mfp.alpha a numeric value between 0 and 1 that sets significance level
 #' for inclusion of demographic predictors into normative formula. Passed to the
-#' mfp() function. Default value is 1 for inclusion of all predictors,
+#' mfp() function. Default value is 1 for inclusion of all predictors
 #' regardless of their significance.
 #' @param rnd.s a logical indicating whether the scaled scores should be
 #' rounded. Default is TRUE.
@@ -277,7 +277,6 @@ deficit.scores <- function(Tscore)
   ### create a list to collect all necessary info
   ss.name <- paste(test, "scaled", sep = "_")     # name the scaled score
   ts.name <- paste(test, "adj", sep = "_")       # name the t-score
-  tsr.name <- paste(test, "adj_rnd", sep = "_")  # name the rounded t-score
   ds.name <- paste(test, "def", sep = "_")        # name the deficit score
 
   ### run norming process
