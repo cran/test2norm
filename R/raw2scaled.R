@@ -15,7 +15,7 @@
 #' @param all.controls a logical indicating whether all observations should be
 #' treated as controls. Overwrites group.id and control.id.
 #' @param rnd.s a logical indicating whether the scaled scores should be
-#' rounded. Default is TRUE.
+#' rounded. Default is FALSE.
 #'
 #' @details
 #' The \code{raw2scaled()} function can be used by neuropsychologists, who wish
@@ -44,10 +44,8 @@
 #' Anya Umlauf
 #'
 #' @references
-#' Umlauf A et al. (In revision) Automated procedure to produce normative
-#' correction formulas modeling demographic effects on cognitive test scores and
-#' apply them to obtain demographically corrected scores. Manuscript submitted
-#' for publication.
+#' Umlauf A et al. (2022) Automated procedure for demographic adjustments on
+#' cognitive test scores. Manuscript submitted for publication.
 #'
 #' Heaton RK, Taylor MJ, & Manly J (2003) Demographic effects and use of
 #' demographically corrected norms with the WAIS-III and WMS-III. In: Tulsky D
@@ -70,7 +68,7 @@
 raw2scaled <- function (data = NULL, test = NULL, test.min = NULL,
                         test.max = NULL, test.better = c("High", "Low"),
                         group.id = NULL, control.id = NULL,
-                        all.controls = FALSE, rnd.s = TRUE)
+                        all.controls = FALSE, rnd.s = FALSE)
 {
   #### Check availability of necessary data:
   ## Stop the program if necessary information is not provided

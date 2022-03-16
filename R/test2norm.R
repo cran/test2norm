@@ -22,9 +22,9 @@
 #' mfp() function. Default value is 1 for inclusion of all predictors
 #' regardless of their significance.
 #' @param rnd.s a logical indicating whether the scaled scores should be
-#' rounded. Default is TRUE.
+#' rounded. Default is FALSE.
 #' @param rnd.a a logical indicating whether the adjusted scores (T-scores)
-#' should be rounded. Default is TRUE.
+#' should be rounded. Default is FALSE.
 #' @param mean.a numeric value for the mean of adjusted score (T-score)
 #' distribution.
 #' @param sd.a numeric value for the standard deviation of adjusted score
@@ -41,7 +41,7 @@
 #' application of the \code{test2norm()} function. This will significantly
 #' reduce software running time. The recommended number of decimal digits is 4
 #' or fewer. Detailed description of the procedure will be found in Umlauf et al
-#' (2019).
+#' (2022).
 #'
 #' @return
 #' A list consisting of 6 objects. The first four are vectors containing the
@@ -60,10 +60,8 @@
 #' Anya Umlauf
 #'
 #' @references
-#' Umlauf A et al (2019) Automated procedure to produce normative correction
-#' formulas modeling demographic effects on cognitive test scores and apply them
-#' to obtain demographically corrected scores. Manuscript submitted for
-#' publication.
+#' Umlauf A et al. (2022) Automated procedure for demographic adjustments on
+#' cognitive test scores. Manuscript submitted for publication.
 #'
 #' Heaton RK, Taylor MJ, & Manly J (2003) Demographic effects and use of
 #' demographically corrected norms with the WAIS-III and WMS-III. In: Tulsky D
@@ -92,7 +90,7 @@ test2norm <- function (data = NULL, test = NULL, test.min = NULL,
                        test.max = NULL, test.better = c("High", "Low"),
                        group.id = NULL, control.id = NULL,
                        all.controls = FALSE, demographics = NULL, mfp.alpha = 1,
-                       rnd.s = TRUE, rnd.a = TRUE, mean.a = 50, sd.a = 10)
+                       rnd.s = FALSE, rnd.a = FALSE, mean.a = 50, sd.a = 10)
 {
   #### Check availability of necessary data:
   ## Stop the program if necessary information is not provided
@@ -276,7 +274,7 @@ deficit.scores <- function(Tscore)
   Ncontrol <- nrow(data1[data1[,group.id] == control.id, ]) 	# count controls
   ### create a list to collect all necessary info
   ss.name <- paste(test, "scaled", sep = "_")     # name the scaled score
-  ts.name <- paste(test, "adj", sep = "_")       # name the t-score
+  ts.name <- paste(test, "adj", sep = "_")        # name the t-score
   ds.name <- paste(test, "def", sep = "_")        # name the deficit score
 
   ### run norming process

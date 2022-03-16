@@ -12,7 +12,7 @@ score2adjust(
   all.controls = FALSE,
   demographics = NULL,
   mfp.alpha = 1,
-  rnd.a = TRUE,
+  rnd.a = FALSE,
   mean.a = 50,
   sd.a = 10
 )
@@ -44,7 +44,7 @@ for inclusion of demographic predictors into normative formula. Passed to the
 inclusion of all predictors regardless of their significance.}
 
 \item{rnd.a}{a logical indicating whether the adjusted scores (T-scores)
-should be rounded. Default is TRUE.}
+should be rounded. Default is FALSE.}
 
 \item{mean.a}{numeric value for the mean of adjusted score (T-score)
 distribution.}
@@ -87,10 +87,8 @@ score2adjust(data = PsychTestData, test.score = "scaledscore",
              demographics = c("age", "sex"))
 }
 \references{
-Umlauf A et al (2019) Automated procedure to produce normative correction
-formulas modeling demographic effects on cognitive test scores and apply them
-to obtain demographically corrected scores. Manuscript submitted for
-publication.
+Umlauf A et al. (2022) Automated procedure for demographic adjustments on
+cognitive test scores. Manuscript submitted for publication.
 
 Heaton RK, Taylor MJ, & Manly J (2003) Demographic effects and use of
 demographically corrected norms with the WAIS-III and WMS-III. In: Tulsky D

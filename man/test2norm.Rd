@@ -15,8 +15,8 @@ test2norm(
   all.controls = FALSE,
   demographics = NULL,
   mfp.alpha = 1,
-  rnd.s = TRUE,
-  rnd.a = TRUE,
+  rnd.s = FALSE,
+  rnd.a = FALSE,
   mean.a = 50,
   sd.a = 10
 )
@@ -54,10 +54,10 @@ mfp() function. Default value is 1 for inclusion of all predictors
 regardless of their significance.}
 
 \item{rnd.s}{a logical indicating whether the scaled scores should be
-rounded. Default is TRUE.}
+rounded. Default is FALSE.}
 
 \item{rnd.a}{a logical indicating whether the adjusted scores (T-scores)
-should be rounded. Default is TRUE.}
+should be rounded. Default is FALSE.}
 
 \item{mean.a}{numeric value for the mean of adjusted score (T-score)
 distribution.}
@@ -92,7 +92,7 @@ that have many decimal digits should be rounded to fewer digits prior to the
 application of the \code{test2norm()} function. This will significantly
 reduce software running time. The recommended number of decimal digits is 4
 or fewer. Detailed description of the procedure will be found in Umlauf et al
-(2019).
+(2022).
 }
 \examples{
 data(PsychTestData)
@@ -102,10 +102,8 @@ test2norm(data = PsychTestData, test = "rawscore",
           demographics = c("age", "sex"))
 }
 \references{
-Umlauf A et al (2019) Automated procedure to produce normative correction
-formulas modeling demographic effects on cognitive test scores and apply them
-to obtain demographically corrected scores. Manuscript submitted for
-publication.
+Umlauf A et al. (2022) Automated procedure for demographic adjustments on
+cognitive test scores. Manuscript submitted for publication.
 
 Heaton RK, Taylor MJ, & Manly J (2003) Demographic effects and use of
 demographically corrected norms with the WAIS-III and WMS-III. In: Tulsky D

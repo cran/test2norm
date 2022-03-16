@@ -19,7 +19,7 @@
 #' \code{mfp()} function (its \code{select} argument). Default value is 1 for
 #' inclusion of all predictors regardless of their significance.
 #' @param rnd.a a logical indicating whether the adjusted scores (T-scores)
-#' should be rounded. Default is TRUE.
+#' should be rounded. Default is FALSE.
 #' @param mean.a numeric value for the mean of adjusted score (T-score)
 #' distribution.
 #' @param sd.a numeric value for the standard deviation of adjusted score
@@ -50,10 +50,8 @@
 #' Anya Umlauf
 #'
 #' @references
-#' Umlauf A et al (2019) Automated procedure to produce normative correction
-#' formulas modeling demographic effects on cognitive test scores and apply them
-#' to obtain demographically corrected scores. Manuscript submitted for
-#' publication.
+#' Umlauf A et al. (2022) Automated procedure for demographic adjustments on
+#' cognitive test scores. Manuscript submitted for publication.
 #'
 #' Heaton RK, Taylor MJ, & Manly J (2003) Demographic effects and use of
 #' demographically corrected norms with the WAIS-III and WMS-III. In: Tulsky D
@@ -84,7 +82,7 @@
 score2adjust <- function (data = NULL, test.score = NULL,
                           group.id = NULL, control.id = NULL,
                           all.controls = FALSE, demographics = NULL,
-                          mfp.alpha = 1, rnd.a = TRUE, mean.a = 50, sd.a = 10)
+                          mfp.alpha = 1, rnd.a = FALSE, mean.a = 50, sd.a = 10)
 {
   #### Check availability of necessary data:
   ## Stop the program if necessary information is not provided

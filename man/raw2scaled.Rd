@@ -13,7 +13,7 @@ raw2scaled(
   group.id = NULL,
   control.id = NULL,
   all.controls = FALSE,
-  rnd.s = TRUE
+  rnd.s = FALSE
 )
 }
 \arguments{
@@ -40,7 +40,7 @@ group within group.id variable. Ignored, if all.controls = TRUE.}
 treated as controls. Overwrites group.id and control.id.}
 
 \item{rnd.s}{a logical indicating whether the scaled scores should be
-rounded. Default is TRUE.}
+rounded. Default is FALSE.}
 }
 \value{
 A list consisting of 3 objects. The first two are vectors containing the
@@ -75,10 +75,8 @@ raw2scaled(data = PsychTestData, test = "rawscore",
            group.id = "group", control.id = "control")
 }
 \references{
-Umlauf A et al. (In revision) Automated procedure to produce normative
-correction formulas modeling demographic effects on cognitive test scores and
-apply them to obtain demographically corrected scores. Manuscript submitted
-for publication.
+Umlauf A et al. (2022) Automated procedure for demographic adjustments on
+cognitive test scores. Manuscript submitted for publication.
 
 Heaton RK, Taylor MJ, & Manly J (2003) Demographic effects and use of
 demographically corrected norms with the WAIS-III and WMS-III. In: Tulsky D
