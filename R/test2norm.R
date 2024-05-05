@@ -1,7 +1,9 @@
 #' Convert raw neuropsychological test scores to demographically adjusted norms.
 #'
 #' @param data a data frame containing the variables needed for the norming
-#' process
+#' process. The current version of the function does not accomodate missing
+#' data. For best results, exclude cases with missing test scores or missing
+#' demographics before applying this function.
 #' @param test a character string specifying the name of the test to be normed
 #' @param test.min a real number indicating the smallest possible test score
 #' @param test.max a real number indicating the largest possible test score
@@ -16,32 +18,33 @@
 #' treated as controls. Overwrites group.id and control.id.
 #' @param demographics a single or multiple character strings (concatenated by
 #' c() function) specifying the names of demographic predictors to be included
-#' into normative formulas.
+#' into normative formulas. Demographic variables should be numeric or binary
+#' (0/1).
 #' @param mfp.alpha a numeric value between 0 and 1 that sets significance level
 #' for inclusion of demographic predictors into normative formula. Passed to the
-#' mfp() function. Default value is 1 for inclusion of all predictors
+#' mfp2() function. Default value is 1 for inclusion of all predictors
 #' regardless of their significance.
 #' @param rnd.s a logical indicating whether the scaled scores should be
-#' rounded. Default is FALSE.
+#' rounded. Default is TRUE.
 #' @param rnd.a a logical indicating whether the adjusted scores (T-scores)
-#' should be rounded. Default is FALSE.
+#' should be rounded. Default is TRUE.
 #' @param mean.a numeric value for the mean of adjusted score (T-score)
-#' distribution.
+#' distribution. Default is 50.
 #' @param sd.a numeric value for the standard deviation of adjusted score
-#' (T-score) distribution.
+#' (T-score) distribution. Default is 10.
 #'
 #' @details
 #' The \code{test2norm()} function can be used by neuropsychologists, who wish
 #' to construct normative formulas for cognitive tests that adjust for expected
 #' effects of demographic characteristics (e.g., age), using methods described
 #' in Heaton et al. (2003 & 2009). The norming procedure makes use of the
-#' \code{mfp()} function from the \code{mfp} package to explore nonlinear
+#' \code{mfp2()} function from the \code{mfp2} package to explore nonlinear
 #' associations between cognition and demographic variables. The raw test scores
 #' that have many decimal digits should be rounded to fewer digits prior to the
 #' application of the \code{test2norm()} function. This will significantly
 #' reduce software running time. The recommended number of decimal digits is 4
-#' or fewer. Detailed description of the procedure will be found in Umlauf et al
-#' (2022).
+#' or fewer. Detailed description of the procedure are found in Umlauf et al.
+#' (2024). (Previous versions of the function depended on \code{mfp} package.)
 #'
 #' @return
 #' A list consisting of 6 objects. The first four are vectors containing the
@@ -60,8 +63,8 @@
 #' Anya Umlauf
 #'
 #' @references
-#' Umlauf A et al. (2022) Automated procedure for demographic adjustments on
-#' cognitive test scores. Manuscript submitted for publication.
+#' Umlauf A et al. (2024) Automated procedure for demographic adjustments on
+#' cognitive test scores. <doi:10.1080/23279095.2023.2288231>
 #'
 #' Heaton RK, Taylor MJ, & Manly J (2003) Demographic effects and use of
 #' demographically corrected norms with the WAIS-III and WMS-III. In: Tulsky D
@@ -76,8 +79,14 @@
 #' Benner A (2005) mfp: Multivariable fractional polynomials.
 #' \emph{R News} 5(2): 20–23.
 #'
-#' @import stats
-#' @import mfp
+#' @importFrom stats as.formula
+#' @importFrom stats na.omit
+#' @importFrom stats predict
+#' @importFrom stats qnorm
+#' @importFrom stats qt
+#' @importFrom stats residuals
+#' @importFrom stats sd
+#' @import mfp2
 #' @export test2norm
 #'
 #' @examples
@@ -85,12 +94,12 @@
 #' test2norm(data = PsychTestData, test = "rawscore",
 #'           test.min = 0, test.max = 36, test.better = "High",
 #'           group.id = "group", control.id = "control",
-#'           demographics = c("age", "sex"))
+#'           demographics = c("age", "male"))
 test2norm <- function (data = NULL, test = NULL, test.min = NULL,
                        test.max = NULL, test.better = c("High", "Low"),
                        group.id = NULL, control.id = NULL,
                        all.controls = FALSE, demographics = NULL, mfp.alpha = 1,
-                       rnd.s = FALSE, rnd.a = FALSE, mean.a = 50, sd.a = 10)
+                       rnd.s = TRUE, rnd.a = TRUE, mean.a = 50, sd.a = 10)
 {
   #### Check availability of necessary data:
   ## Stop the program if necessary information is not provided
@@ -180,7 +189,7 @@ test2norm <- function (data = NULL, test = NULL, test.min = NULL,
       scale.contr <- c(scale.contr, 10 + 3*(quantileMAX - meanQ)/sdQ)
     }
 
-  ## step 2: use SS from controls to calculate SS for the all
+    ## step 2: use SS from controls to calculate SS for the all
     scaled <- c()
     cont <- data.frame(rs = controls, ss = scale.contr)
     cont <- na.omit(unique(cont[order(cont$rs), ]))
@@ -200,7 +209,7 @@ test2norm <- function (data = NULL, test = NULL, test.min = NULL,
         }
     }
 
-  ## step 3: use SS from controls to create mapping files for each test
+    ## step 3: use SS from controls to create mapping files for each test
     ndp <- decimals(round(controls, 4))			   # ndp (number of decimal places)
     raw.map <- seq(minRaw, maxRaw, by = 1/(10^ndp))
     scale.map <- scale.contr[match(raw.map, controls)]
@@ -215,56 +224,56 @@ test2norm <- function (data = NULL, test = NULL, test.min = NULL,
         }
     }
 
-	scale.map.round <- round(scale.map)       	# a vector of rounded SSs
-	Uscale.map.round <- unique(scale.map.round)	# a vector of unique rounded SSs
-	mapping <- data.frame(raw = NA, ss = NA)  	# mapping table
+	  scale.map.round <- round(scale.map)       	# a vector of rounded SSs
+	  Uscale.map.round <- unique(scale.map.round)	# a vector of unique rounded SSs
+	  mapping <- data.frame(raw = NA, ss = NA)  	# mapping table
 
-	for(i in 1:length(Uscale.map.round))
-	{
-		interval <- raw.map[scale.map.round == Uscale.map.round[i]]
-		mapping[i,] <- c(ifelse(length(interval) == 1,
-		                        formatC(min(interval), digits = ndp, format = "f"),
-		                        paste(formatC(min(interval),
-		                                      digits = ndp, format = "f"), " - ",
-		                              formatC(max(interval),
-		                                      digits = ndp, format = "f"))),
-		                 Uscale.map.round[i])
-	}
+	  for(i in 1:length(Uscale.map.round))
+	  {
+		  interval <- raw.map[scale.map.round == Uscale.map.round[i]]
+		  mapping[i,] <- c(ifelse(length(interval) == 1,
+		                          formatC(min(interval), digits = ndp, format = "f"),
+		                          paste(formatC(min(interval),
+		                                        digits = ndp, format = "f"), " - ",
+		                                formatC(max(interval),
+		                                        digits = ndp, format = "f"))),
+		                  Uscale.map.round[i])
+	  }
 
-	sc.scores <- list(scaled, mapping)
-  return(sc.scores)
+	  sc.scores <- list(scaled, mapping)
+    return(sc.scores)
 
-}   ## END of scaled score calculating function
+  }   ## END of scaled score calculating function
 
-#### STEP 2: at the moment is done within 'for' loop down below
-#### MFP procedure, calculating T-scores
+  #### STEP 2: at the moment is done within 'for' loop down below
+  #### MFP procedure, calculating T-scores
   ## 'select' is set to 1 to keep all given variables in the model
 	## 'maxits' is the maximum number of iterations for the backfitting stage
 	## 'rescale' uses re-scaling to show the parameters
   ## for covariates on their original scale (want FALSE)
 	## 'verbose' will hide the selection process if FALSE, and show them if TRUE
-## END of t-score calculating function
+  ## END of t-score calculating function
 
-#### STEP 3:
-#### Deficit scores procedure
-deficit.scores <- function(Tscore)
-{
-	def <- rep(NA, length(Tscore))
-	for (i in 1:length(Tscore))
-	{
-	  if (!is.na(Tscore[i]))
+  #### STEP 3:
+  #### Deficit scores procedure
+  deficit.scores <- function(Tscore)
+  {
+	  def <- rep(NA, length(Tscore))
+	  for (i in 1:length(Tscore))
 	  {
-	    if (Tscore[i] >= (mean.a - sd.a)) {def[i] <- 0}
-	    else if (Tscore[i] >= (mean.a - 1.5*sd.a)) {def[i] <- 1}
-	    else if (Tscore[i] >= (mean.a - 2.0*sd.a)) {def[i] <- 2}
-	    else if (Tscore[i] >= (mean.a - 2.5*sd.a)) {def[i] <- 3}
-	    else if (Tscore[i] >= (mean.a - 3.0*sd.a)) {def[i] <- 4}
-	    else if (Tscore[i] < (mean.a - 3.0*sd.a))  {def[i] <- 5}
+	    if (!is.na(Tscore[i]))
+	    {
+	      if (Tscore[i] >= (mean.a - sd.a)) {def[i] <- 0}
+	      else if (Tscore[i] >= (mean.a - 1.5*sd.a)) {def[i] <- 1}
+	      else if (Tscore[i] >= (mean.a - 2.0*sd.a)) {def[i] <- 2}
+	      else if (Tscore[i] >= (mean.a - 2.5*sd.a)) {def[i] <- 3}
+	      else if (Tscore[i] >= (mean.a - 3.0*sd.a)) {def[i] <- 4}
+	      else if (Tscore[i] < (mean.a - 3.0*sd.a))  {def[i] <- 5}
+	    }
 	  }
-	}
-	return(def)
+	  return(def)
 
-}## END of deficit score calculating function
+  }## END of deficit score calculating function
 
   ###### Calculate norms, applying above functions
   ### Make a data.frame for internal purposes
@@ -296,31 +305,83 @@ deficit.scores <- function(Tscore)
   {
 	  covs[[i]] <- ifelse(is.factor(data[, demographics[i]]),
 	                      demographics[i],
-	                      paste("fp(", demographics[i], ", df = 4)", sep = ""))
+	                      paste("fp2(", demographics[i],
+	                            ", df = 4, center = FALSE, select = mfp.alpha)",
+	                            sep = ""))
   }
   RS.fmla <- paste(unlist(covs), collapse = " + ")
   fmla <- as.formula(paste(ss.name, " ~ ", RS.fmla))
 
-  model <- mfp(fmla, data = data1[data1[, group.id] == control.id, ],
-               family = gaussian, select = mfp.alpha,
-               maxits = 5, rescale = FALSE, verbose = FALSE)
-  predicted <- predict(model, newdata = data1)
+  model <- mfp2(fmla, data = data1[data1[, group.id] == control.id, ],
+                family = "gaussian", select = mfp.alpha,
+                maxits = 5, verbose = FALSE)
+  predicted <- as.numeric(predict(model,
+                                  newdata = data1[,c(ss.name,demographics)]))
   s <- sd(residuals(model), na.rm = TRUE)
   z <- (data1[, ss.name] - predicted)/s
   t <- z*sd.a + mean.a
 
   {
-	  if (rnd.a == FALSE) data1[, ts.name] <- t  # T-scores
-	  else data1[, ts.name] <- round(t)          # rounded T-scores (integers)
+	  if (rnd.a == FALSE) data1[, ts.name] <- t  # adjusted scores (T-scores)
+	  else data1[, ts.name] <- round(t)          # rounded adj. scores (integers)
   }
 
   # Step 3: calculate Deficit Scores (DS)
   data1[, ds.name] <- deficit.scores(data1[, ts.name]) # DSs
 
   # Additional step: calculate 95% confidence intervals for the coefficients
-  conflev = qt(0.975, df = model$df.residual)
-  coef.lower <- (model$coefficients - conflev*sqrt(diag(model$var)))
-  coef.upper <- (model$coefficients + conflev*sqrt(diag(model$var)))
+  conflev <- qt(0.975, df = model$df.residual)
+  coef.me <- conflev*sqrt(diag(summary(model)$cov.scaled))
+  coef.lower <- (model$coefficients - coef.me)
+  coef.upper <- (model$coefficients + coef.me)
+
+  # Save transformations for the output
+  trafo <- cbind(model$transformations, model$fp_terms)
+  { if(!"power2" %in% names(trafo)) trafo$power2 <- NA }
+  trafo$formula <- NA
+  for(i in 1:nrow(trafo)) # this loop assumes that 'center = FALSE'
+  {
+    if(trafo[i, "selected"] == TRUE){
+      x.i <- rownames(trafo)[i]
+      if(trafo$shift[i] == 0) x.shift <- x.i
+      else{
+        shft.i <- ifelse(trafo$shift[i] < 0, as.character(trafo$shift[i]),
+                         as.character(paste("+",trafo$shift[i], sep="")))
+        x.shift <- paste("(",x.i,shft.i,")",sep = "")
+      }
+
+      if(trafo$scale[i] == 1) x.scale <- x.shift
+      else x.scale <- paste(x.shift,"/",trafo$scale[i], sep="")
+
+      if(is.na(trafo$power2[i]))
+        fmla.i <- ifelse(trafo$power1[i] !=0,
+                         paste("I((",x.scale,")^",trafo$power1[i],")", sep=""),
+                         paste("I(log(",x.scale,"))", sep=""))
+      else if(trafo$power1[i] != trafo$power2[i]){
+        fmla.i.p1 <- ifelse(trafo$power1[i] !=0,
+                            paste("I((",x.scale,")^",trafo$power1[i],")",
+                                  sep=""),
+                            paste("I(log(",x.scale,"))", sep=""))
+        fmla.i.p2 <- ifelse(trafo$power2[i] !=0,
+                            paste("I((",x.scale,")^",trafo$power2[i],")",
+                                  sep=""),
+                            paste("I(log(",x.scale,"))", sep=""))
+        fmla.i <- paste(fmla.i.p1, fmla.i.p2, sep="+")
+      }
+      else if(trafo$power1[i] == 0 & trafo$power2[i] == 0){
+        fmla.i.p1 <- paste("I(log(",x.scale,"))", sep="")
+        fmla.i.p2 <- paste("I(log(",x.scale,")^2)", sep="")
+        fmla.i <- paste(fmla.i.p1, fmla.i.p2, sep="+")
+      }
+      else if(trafo$power1[i] == trafo$power2[i]){
+        fmla.i.p1 <- paste("I((",x.scale,")^",trafo$power1[i],")", sep="")
+        fmla.i.p2 <- paste("I((",x.scale,")^",trafo$power2[i],
+                           "log(",x.scale,"))", sep="")
+        fmla.i <- paste(fmla.i.p1, fmla.i.p2, sep="+")
+      }
+      trafo$formula[i] <- fmla.i
+    }
+  }
 
   ### save norming info
   tab.out <- list(data1[, test], data1[, ss.name],
@@ -330,7 +391,8 @@ deficit.scores <- function(Tscore)
                                         cbind(summary(model)$coef,
                                               low95 = coef.lower,
                                               upp95 = coef.upper),
-                                      transformations = model$trafo,
+                                      transformations = trafo[,"formula",
+                                                              drop=FALSE],
                                       coefficients = model$coefficients,
                                       residual.SD = s))
   names(tab.out)[1:4] <- c(test, ss.name, ts.name, ds.name)

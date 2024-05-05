@@ -15,7 +15,7 @@
 #' @param all.controls a logical indicating whether all observations should be
 #' treated as controls. Overwrites group.id and control.id.
 #' @param rnd.s a logical indicating whether the scaled scores should be
-#' rounded. Default is FALSE.
+#' rounded. Default is TRUE.
 #'
 #' @details
 #' The \code{raw2scaled()} function can be used by neuropsychologists, who wish
@@ -25,7 +25,7 @@
 #' the \code{raw2scaled()} function. This will significantly reduce software
 #' running time. The recommended number of decimal digits is 4 or fewer. Values
 #' below \code{test.min} or above \code{test.max} will result in NA. Detailed
-#' description of the procedure will be found in Umlauf et al. (In revision).
+#' description of the procedure are found in Umlauf et al. (2024).
 #'
 #' Note that the function does not guarantee that the calculated scaled scores
 #' range from 0 to 20, because it uses normal distribution quantiles. Therefore,
@@ -44,8 +44,8 @@
 #' Anya Umlauf
 #'
 #' @references
-#' Umlauf A et al. (2022) Automated procedure for demographic adjustments on
-#' cognitive test scores. Manuscript submitted for publication.
+#' Umlauf A et al. (2024) Automated procedure for demographic adjustments on
+#' cognitive test scores. <doi:10.1080/23279095.2023.2288231>
 #'
 #' Heaton RK, Taylor MJ, & Manly J (2003) Demographic effects and use of
 #' demographically corrected norms with the WAIS-III and WMS-III. In: Tulsky D
@@ -57,7 +57,9 @@
 #' & Adams KM (Eds.) \emph{Neuropsychological Assessment of Neuropsychiatric
 #' and Neuromedical Disorders}. New York, NY: Oxford University Press, 127-155.
 #'
-#' @import stats
+#' @importFrom stats na.omit
+#' @importFrom stats qnorm
+#' @importFrom stats sd
 #' @export raw2scaled
 #'
 #' @examples
@@ -68,7 +70,7 @@
 raw2scaled <- function (data = NULL, test = NULL, test.min = NULL,
                         test.max = NULL, test.better = c("High", "Low"),
                         group.id = NULL, control.id = NULL,
-                        all.controls = FALSE, rnd.s = FALSE)
+                        all.controls = FALSE, rnd.s = TRUE)
 {
   #### Check availability of necessary data:
   ## Stop the program if necessary information is not provided

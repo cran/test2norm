@@ -1,7 +1,9 @@
 #' Convert neuropsychological test scores to demographically adjusted norms.
 #'
 #' @param data a data frame containing the variables needed for the norming
-#' process.
+#' process. The current version of the function does not accomodate missing
+#' data. For best results, exclude cases with missing test scores or missing
+#' demographics before applying this function.
 #' @param test.score a character string specifying the name of the test to be
 #' normed, usually the output of the \code{raw2scaled()} function.
 #' @param group.id a character string specifying the name of the variable
@@ -13,17 +15,18 @@
 #' treated as controls. Overwrites group.id and control.id.
 #' @param demographics a single or multiple character strings (concatenated by
 #' \code{c()} function) specifying the names of demographic predictors to be
-#' included into normative formulas.
+#' included into normative formulas. Demographic variables should be numeric or
+#' binary (0/1).
 #' @param mfp.alpha a numeric value between 0 and 1 that sets significance level
 #' for inclusion of demographic predictors into normative formula. Passed to the
-#' \code{mfp()} function (its \code{select} argument). Default value is 1 for
+#' \code{mfp2()} function (its \code{select} argument). Default value is 1 for
 #' inclusion of all predictors regardless of their significance.
 #' @param rnd.a a logical indicating whether the adjusted scores (T-scores)
-#' should be rounded. Default is FALSE.
+#' should be rounded. Default is TRUE.
 #' @param mean.a numeric value for the mean of adjusted score (T-score)
-#' distribution.
+#' distribution. Default is 50.
 #' @param sd.a numeric value for the standard deviation of adjusted score
-#' (T-score) distribution.
+#' (T-score) distribution. Default is 10.
 #'
 #' @details
 #' The \code{score2adjust()} function can be used by neuropsychologists, who
@@ -31,9 +34,10 @@
 #' expected effects of demographic characteristics (e.g., age), using methods
 #' described in Heaton et al. (2003 & 2009). The adjusted scores are sometimes
 #' referred to as T-scores in the literature. The norming procedure makes use of
-#' the \code{mfp()} function from the \code{mfp} package to explore nonlinear
+#' the \code{mfp2()} function from the \code{mfp2} package to explore nonlinear
 #' associations between cognition and demographic variables. Detailed
-#' description of the procedure will be found in Umlauf et al. (in revision).
+#' description of the procedure are found in Umlauf et al. (2024). (Previous
+#' versions of the function depended on \code{mfp} package.)
 #'
 #' @return
 #' A list consisting of 3 objects. The first two are vectors containing the
@@ -50,8 +54,8 @@
 #' Anya Umlauf
 #'
 #' @references
-#' Umlauf A et al. (2022) Automated procedure for demographic adjustments on
-#' cognitive test scores. Manuscript submitted for publication.
+#' Umlauf A et al. (2024) Automated procedure for demographic adjustments on
+#' cognitive test scores. <doi:10.1080/23279095.2023.2288231>
 #'
 #' Heaton RK, Taylor MJ, & Manly J (2003) Demographic effects and use of
 #' demographically corrected norms with the WAIS-III and WMS-III. In: Tulsky D
@@ -66,8 +70,12 @@
 #' Benner A (2005) mfp: Multivariable fractional polynomials.
 #' \emph{R News} 5(2): 20–23.
 #'
-#' @import stats
-#' @import mfp
+#' @importFrom stats as.formula
+#' @importFrom stats predict
+#' @importFrom stats qt
+#' @importFrom stats residuals
+#' @importFrom stats sd
+#' @import mfp2
 #' @export score2adjust
 #'
 #' @examples
@@ -78,11 +86,11 @@
 #'                                         control.id="control")[[2]]
 #' score2adjust(data = PsychTestData, test.score = "scaledscore",
 #'              group.id = "group", control.id = "control",
-#'              demographics = c("age", "sex"))
+#'              demographics = c("age", "male"))
 score2adjust <- function (data = NULL, test.score = NULL,
                           group.id = NULL, control.id = NULL,
                           all.controls = FALSE, demographics = NULL,
-                          mfp.alpha = 1, rnd.a = FALSE, mean.a = 50, sd.a = 10)
+                          mfp.alpha = 1, rnd.a = TRUE, mean.a = 50, sd.a = 10)
 {
   #### Check availability of necessary data:
   ## Stop the program if necessary information is not provided
@@ -125,16 +133,19 @@ score2adjust <- function (data = NULL, test.score = NULL,
   {
     covs[[i]] <- ifelse(is.factor(data[, demographics[i]]),
                         demographics[i],
-                        paste("fp(", demographics[i], ", df = 4)", sep = ""))
+                        paste("fp2(", demographics[i],
+                              ", df = 4, center = FALSE, select = mfp.alpha)",
+                              sep = ""))
   }
   # define model formula
   RS.fmla <- paste(unlist(covs), collapse = " + ")
   fmla <- as.formula(paste(test.score, " ~ ", RS.fmla))
 
-  model <- mfp(fmla, data = data1[data1[, group.id] == control.id, ],
-               family = gaussian, select = mfp.alpha,
-               maxits = 5, rescale = FALSE, verbose = FALSE)
-  predicted <- predict(model, newdata = data1)
+  model <- mfp2(fmla, data = data1[data1[, group.id] == control.id, ],
+                family = "gaussian", select = mfp.alpha,
+                maxits = 5, verbose = FALSE)
+  predicted <- as.numeric(predict(model,
+                                  newdata = data1[,c(test.score,demographics)]))
   s <- sd(residuals(model), na.rm = TRUE)
   z <- (data1[, test.score] - predicted)/s
   t <- z*sd.a + mean.a
@@ -145,9 +156,58 @@ score2adjust <- function (data = NULL, test.score = NULL,
   }
 
   # calculate 95% confidence intervals for the coefficients
-  conflev = qt(0.975, df = model$df.residual)
-  coef.lower <- (model$coefficients - conflev*sqrt(diag(model$var)))
-  coef.upper <- (model$coefficients + conflev*sqrt(diag(model$var)))
+  conflev <- qt(0.975, df = model$df.residual)
+  coef.me <- conflev*sqrt(diag(summary(model)$cov.scaled))
+  coef.lower <- (model$coefficients - coef.me)
+  coef.upper <- (model$coefficients + coef.me)
+
+  # Save transformations for the output
+  trafo <- cbind(model$transformations, model$fp_terms)
+  { if(!"power2" %in% names(trafo)) trafo$power2 <- NA }
+  trafo$formula <- NA
+  for(i in 1:nrow(trafo)) # this loop assumes that 'center = FALSE'
+  {
+    if(trafo[i, "selected"] == TRUE){
+      x.i <- rownames(trafo)[i]
+      if(trafo$shift[i] == 0) x.shift <- x.i
+      else{
+        shft.i <- ifelse(trafo$shift[i] < 0, as.character(trafo$shift[i]),
+                         as.character(paste("+",trafo$shift[i], sep="")))
+        x.shift <- paste("(",x.i,shft.i,")",sep = "")
+      }
+
+      if(trafo$scale[i] == 1) x.scale <- x.shift
+      else x.scale <- paste(x.shift,"/",trafo$scale[i], sep="")
+
+      if(is.na(trafo$power2[i]))
+        fmla.i <- ifelse(trafo$power1[i] !=0,
+                         paste("I((",x.scale,")^",trafo$power1[i],")", sep=""),
+                         paste("I(log(",x.scale,"))", sep=""))
+      else if(trafo$power1[i] != trafo$power2[i]){
+        fmla.i.p1 <- ifelse(trafo$power1[i] !=0,
+                            paste("I((",x.scale,")^",trafo$power1[i],")",
+                                  sep=""),
+                            paste("I(log(",x.scale,"))", sep=""))
+        fmla.i.p2 <- ifelse(trafo$power2[i] !=0,
+                            paste("I((",x.scale,")^",trafo$power2[i],")",
+                                  sep=""),
+                            paste("I(log(",x.scale,"))", sep=""))
+        fmla.i <- paste(fmla.i.p1, fmla.i.p2, sep="+")
+      }
+      else if(trafo$power1[i] == 0 & trafo$power2[i] == 0){
+        fmla.i.p1 <- paste("I(log(",x.scale,"))", sep="")
+        fmla.i.p2 <- paste("I(log(",x.scale,")^2)", sep="")
+        fmla.i <- paste(fmla.i.p1, fmla.i.p2, sep="+")
+      }
+      else if(trafo$power1[i] == trafo$power2[i]){
+        fmla.i.p1 <- paste("I((",x.scale,")^",trafo$power1[i],")", sep="")
+        fmla.i.p2 <- paste("I((",x.scale,")^",trafo$power2[i],
+                           "log(",x.scale,"))", sep="")
+        fmla.i <- paste(fmla.i.p1, fmla.i.p2, sep="+")
+      }
+      trafo$formula[i] <- fmla.i
+    }
+  }
 
   ### save norming info
   tab.out <- list(data1[, test.score], data1[, ts.name],
@@ -155,10 +215,11 @@ score2adjust <- function (data = NULL, test.score = NULL,
                                         cbind(summary(model)$coef,
                                               low95 = coef.lower,
                                               upp95 = coef.upper),
-                                      transformations = model$trafo,
+                                      transformations = trafo[,"formula",
+                                                              drop=FALSE],
                                       coefficients = model$coefficients,
                                       residual.SD = s,
-                                      powers = model$powers))
+                                      powers = trafo[,c("power1", "power2")]))
   names(tab.out)[1:2] <- c(test.score, ts.name)
 
   #### Print output

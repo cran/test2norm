@@ -12,7 +12,7 @@
 #' \item{rawscore}{raw test score on a neuropsychological test, ranging 0-36,
 #' with higher values indicating better test performance}
 #' \item{age}{age of the participant, in years}
-#' \item{sex}{sex of the participant, male (M) or female (F)}
+#' \item{male}{sex of the participant, male (1) or female (0)}
 #' \item{group}{norming group the participant belongs to (control or test)}
 #' }
 #' @examples
@@ -20,6 +20,6 @@
 #' test2norm(data = PsychTestData, test = "rawscore",
 #'           test.min = 0, test.max = 36, test.better = "High",
 #'           group.id = "group", control.id = "control",
-#'           demographics = c("age", "sex"))
+#'           demographics = c("age", "male"))
 "PsychTestData"
 

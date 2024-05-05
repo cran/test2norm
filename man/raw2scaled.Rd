@@ -13,7 +13,7 @@ raw2scaled(
   group.id = NULL,
   control.id = NULL,
   all.controls = FALSE,
-  rnd.s = FALSE
+  rnd.s = TRUE
 )
 }
 \arguments{
@@ -40,7 +40,7 @@ group within group.id variable. Ignored, if all.controls = TRUE.}
 treated as controls. Overwrites group.id and control.id.}
 
 \item{rnd.s}{a logical indicating whether the scaled scores should be
-rounded. Default is FALSE.}
+rounded. Default is TRUE.}
 }
 \value{
 A list consisting of 3 objects. The first two are vectors containing the
@@ -62,7 +62,7 @@ decimal digits should be rounded to fewer digits prior to the application of
 the \code{raw2scaled()} function. This will significantly reduce software
 running time. The recommended number of decimal digits is 4 or fewer. Values
 below \code{test.min} or above \code{test.max} will result in NA. Detailed
-description of the procedure will be found in Umlauf et al. (In revision).
+description of the procedure are found in Umlauf et al. (2024).
 
 Note that the function does not guarantee that the calculated scaled scores
 range from 0 to 20, because it uses normal distribution quantiles. Therefore,
@@ -75,8 +75,8 @@ raw2scaled(data = PsychTestData, test = "rawscore",
            group.id = "group", control.id = "control")
 }
 \references{
-Umlauf A et al. (2022) Automated procedure for demographic adjustments on
-cognitive test scores. Manuscript submitted for publication.
+Umlauf A et al. (2024) Automated procedure for demographic adjustments on
+cognitive test scores. <doi:10.1080/23279095.2023.2288231>
 
 Heaton RK, Taylor MJ, & Manly J (2003) Demographic effects and use of
 demographically corrected norms with the WAIS-III and WMS-III. In: Tulsky D

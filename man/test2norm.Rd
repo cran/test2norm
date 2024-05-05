@@ -15,15 +15,17 @@ test2norm(
   all.controls = FALSE,
   demographics = NULL,
   mfp.alpha = 1,
-  rnd.s = FALSE,
-  rnd.a = FALSE,
+  rnd.s = TRUE,
+  rnd.a = TRUE,
   mean.a = 50,
   sd.a = 10
 )
 }
 \arguments{
 \item{data}{a data frame containing the variables needed for the norming
-process}
+process. The current version of the function does not accomodate missing
+data. For best results, exclude cases with missing test scores or missing
+demographics before applying this function.}
 
 \item{test}{a character string specifying the name of the test to be normed}
 
@@ -46,24 +48,25 @@ treated as controls. Overwrites group.id and control.id.}
 
 \item{demographics}{a single or multiple character strings (concatenated by
 c() function) specifying the names of demographic predictors to be included
-into normative formulas.}
+into normative formulas. Demographic variables should be numeric or binary
+(0/1).}
 
 \item{mfp.alpha}{a numeric value between 0 and 1 that sets significance level
 for inclusion of demographic predictors into normative formula. Passed to the
-mfp() function. Default value is 1 for inclusion of all predictors
+mfp2() function. Default value is 1 for inclusion of all predictors
 regardless of their significance.}
 
 \item{rnd.s}{a logical indicating whether the scaled scores should be
-rounded. Default is FALSE.}
+rounded. Default is TRUE.}
 
 \item{rnd.a}{a logical indicating whether the adjusted scores (T-scores)
-should be rounded. Default is FALSE.}
+should be rounded. Default is TRUE.}
 
 \item{mean.a}{numeric value for the mean of adjusted score (T-score)
-distribution.}
+distribution. Default is 50.}
 
 \item{sd.a}{numeric value for the standard deviation of adjusted score
-(T-score) distribution.}
+(T-score) distribution. Default is 10.}
 }
 \value{
 A list consisting of 6 objects. The first four are vectors containing the
@@ -86,24 +89,24 @@ The \code{test2norm()} function can be used by neuropsychologists, who wish
 to construct normative formulas for cognitive tests that adjust for expected
 effects of demographic characteristics (e.g., age), using methods described
 in Heaton et al. (2003 & 2009). The norming procedure makes use of the
-\code{mfp()} function from the \code{mfp} package to explore nonlinear
+\code{mfp2()} function from the \code{mfp2} package to explore nonlinear
 associations between cognition and demographic variables. The raw test scores
 that have many decimal digits should be rounded to fewer digits prior to the
 application of the \code{test2norm()} function. This will significantly
 reduce software running time. The recommended number of decimal digits is 4
-or fewer. Detailed description of the procedure will be found in Umlauf et al
-(2022).
+or fewer. Detailed description of the procedure are found in Umlauf et al.
+(2024). (Previous versions of the function depended on \code{mfp} package.)
 }
 \examples{
 data(PsychTestData)
 test2norm(data = PsychTestData, test = "rawscore",
           test.min = 0, test.max = 36, test.better = "High",
           group.id = "group", control.id = "control",
-          demographics = c("age", "sex"))
+          demographics = c("age", "male"))
 }
 \references{
-Umlauf A et al. (2022) Automated procedure for demographic adjustments on
-cognitive test scores. Manuscript submitted for publication.
+Umlauf A et al. (2024) Automated procedure for demographic adjustments on
+cognitive test scores. <doi:10.1080/23279095.2023.2288231>
 
 Heaton RK, Taylor MJ, & Manly J (2003) Demographic effects and use of
 demographically corrected norms with the WAIS-III and WMS-III. In: Tulsky D
